@@ -1,0 +1,11 @@
+package: github.com/ebuchman/ethsign
+import:
+- package: github.com/ethereum/go-ethereum
+  subpackages:
+  - accounts
+  - common
+  - core/types
+  - rlp
+- package: github.com/howeyc/gopass
+- package: github.com/urfave/cli
+  version: ^1.19.1
