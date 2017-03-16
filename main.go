@@ -18,6 +18,7 @@ func main() {
 
 	app.Commands = []cli.Command{
 		signCmd,
+		decodeCmd,
 	}
 	app.Run(os.Args)
 }
@@ -36,7 +37,20 @@ var (
 			gasFlag,
 			gasPriceFlag,
 			dataFlag,
+			outputFlag,
 		},
+	}
+
+	decodeCmd = cli.Command{
+
+		Name:   "decode",
+		Usage:  "Decode an RLP encoded transaction",
+		Action: cliDecode,
+	}
+
+	outputFlag = cli.StringFlag{
+		Name:  "output",
+		Usage: "Output file to write signed transaction to",
 	}
 
 	keyDirFlag = cli.StringFlag{

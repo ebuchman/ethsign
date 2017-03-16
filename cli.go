@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"math/big"
 	"os"
 	"time"
@@ -16,6 +18,30 @@ import (
 	"github.com/urfave/cli"
 )
 
+func cliDecode(c *cli.Context) error {
+	args := c.Args()
+	if len(args) != 1 {
+		return fmt.Errorf("decode takes one arg")
+	}
+
+	txHex := args[0]
+	txBytes, err := hex.DecodeString(txHex)
+	if err != nil {
+		return err
+	}
+
+	tx := new(types.Transaction)
+	err = rlp.Decode(bytes.NewReader(txBytes), tx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("VALUE / 10**18 = ", new(big.Int).Div(tx.Value(), new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil)))
+	fmt.Println("VALUE bit length: ", tx.Value().BitLen())
+	fmt.Println(tx)
+	return nil
+}
+
 func cliSign(c *cli.Context) error {
 
 	fromHex := c.String("from")
@@ -26,6 +52,7 @@ func cliSign(c *cli.Context) error {
 	gas := int64(c.Int("gas"))
 	gasPriceGWei := int64(c.Int("price"))
 	dataHex := c.String("data")
+	outputFile := c.String("output")
 
 	to, err := hex.DecodeString(toHex)
 	if err != nil {
@@ -97,6 +124,14 @@ func cliSign(c *cli.Context) error {
 	}
 
 	fmt.Printf("Signed TX RLP: %X\n", signedTxBytes)
+
+	if outputFile != "" {
+		err := ioutil.WriteFile(outputFile, []byte(hex.EncodeToString(signedTxBytes)), 0600)
+		//	err := ioutil.WriteFile(outputFile, signedTxBytes, 0600)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
